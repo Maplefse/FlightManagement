@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+    <!--业务层的spring配置文件-->
+
+    <!--开启注解功能-->
+    <context:component-scan base-package="com.maplef.service">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+    </context:component-scan>
+
+    <!--配置声明式事务-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--关联数据源-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置增强-->
+    <tx:advice id="txadvice">
+        <tx:attributes>
+            <tx:method name="get"  read-only="true" />
+            <tx:method name="add" propagation="REQUIRES_NEW"/>
+            <tx:method name="update" propagation="REQUIRES_NEW"/>
+            <tx:method name="insert" propagation="REQUIRES_NEW"/>
+            <tx:method name="del" propagation="REQUIRES_NEW"/>
+            <tx:method name="*" propagation="REQUIRES_NEW"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置切点和切面-->
+    <aop:config proxy-target-class="true">
+        <!--配置切点-->
+        <aop:pointcut id="ps" expression="execution(* com.maplef.service..*.*(..))"/>
+        <!--配置切面-->
+        <aop:advisor advice-ref="txadvice" pointcut-ref="ps"/>
+    </aop:config>
+
+    <!--确定业务层的实现类是一个代理模式-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+</beans>

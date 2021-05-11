@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplef.dao.cityMapper">
+    <insert id="addFlight">
+        insert into `flight`(flightNo,departureCity,departureTime,arrivalCity,arrivalTime) values(#{flightNo},#{departureCity},#{departureTime},#{arrivalCity},#{arrivalTime})
+    </insert>
+
+
+    <select id="cityList" resultType="com.maplef.entity.City">
+        select * from city
+    </select>
+    <select id="selFlight" resultMap="Flight">
+        SELECT
+         t_a.`id`,flightNo,departureCity,departureTime,arrivalTime,r.cityName AS rcityName,t.cityName AS tcityName
+        FROM
+            (SELECT * FROM flight) AS t_a
+        INNER JOIN city r ON t_a.arrivalCity = r.id
+        INNER JOIN  city t ON t.id = t_a.departureCity
+        WHERE r.id = #{r} AND t.id =#{t}
+    </select>
+    <select id="checkFlightNo" resultType="java.lang.Integer">
+        select count(*) from flight where flightNo = #{flightNo}
+    </select>
+
+    <resultMap id="Flight" type="com.maplef.entity.Flight">
+        <result property="id" column="id"/>
+        <result property="arrivalCity" column="tcityName"/>
+        <result property="arrivalTime" column="arrivalTime"/>
+        <result property="departureCity" column="rcityName"/>
+        <result property="departureTime" column="departureTime"/>
+        <result property="flightNo" column="flightNo"/>
+    </resultMap>
+</mapper>
